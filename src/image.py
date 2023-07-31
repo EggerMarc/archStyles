@@ -29,3 +29,8 @@ class ArchImages(Dataset):
             return self.transform(img)
         # 3. Return photo
         return img
+
+
+if __name__ == "__main__":
+    breakpoint()
+    ArchImages("../images")

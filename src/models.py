@@ -116,7 +116,7 @@ class Model_0_1(torch.nn.Module):
 
 
 if __name__ == "__main__":
-    train_loader = DataLoader(dataset=dataset, batch_size=16, shuffle=True)
+    train_loader = DataLoader(dataset=dataset, batch_size=1, shuffle=True)
 
     criterion = torch.nn.CrossEntropyLoss()
 

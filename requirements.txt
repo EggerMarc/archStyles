@@ -1,5 +1,6 @@
 pandas==1.4.2
-Pillow==9.1.0
+Pillow==10.0.0
 scikit_image==0.19.3
 torch==1.11.0
 torchvision==0.12.0
+gallery-dl==1.25.8
