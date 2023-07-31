@@ -1,8 +1,9 @@
 #! /bin/bash
 
+ls;
 . ./venv/bin/activate;
 download=false
-images_folder="/images"
+images_folder="/images/"
 
 while getopts "d" option; do
   case "$option" in
