@@ -3,3 +3,4 @@ env
 *.jpg
 __pycache__
 *.ipynb
+.DS_Store

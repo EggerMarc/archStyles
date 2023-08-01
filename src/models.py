@@ -10,8 +10,8 @@ dataset = ArchImages(
     transform=torchvision.transforms.Compose(
         [
             torchvision.transforms.ToTensor(),
-            torchvision.transforms.Resize(1000, antialias=True),
-            torchvision.transforms.CenterCrop(1000),
+            torchvision.transforms.Resize(256, antialias=True),
+            torchvision.transforms.CenterCrop(256),
         ]
     ),
     device=device,
@@ -66,53 +66,53 @@ class Model_0_1(torch.nn.Module):
         n_features: hidden features
         """
         super().__init__()
-        self.K = K
-        self.n_features = n_features
-
-    def encoder(self):
-        encode = torch.nn.Sequential()
-        encode.add_module(
+        self.encoder = torch.nn.Sequential()
+        out_channels = 16
+        kernel_size = 5
+        self.encoder.add_module(
             f"Convolution 0",
-            torch.nn.Conv2d(in_channels=..., out_channels=..., kernel_size=...),
+            torch.nn.Conv2d(in_channels=3, out_channels=out_channels, kernel_size=5),
         )
-        encode.add_module(f"Activation 0", torch.nn.Tanh())
-
-        for k in self.K:
-            encode.add_module(
+        self.encoder.add_module(f"Activation 0", torch.nn.ReLU())
+        for k in range(K - 1):
+            input_channels = out_channels
+            out_channels = out_channels * 2
+            self.encoder.add_module(
                 f"Convolution {k + 1}",
-                torch.nn.Conv2d(in_channels=..., out_channels=..., kernel_size=...),
+                torch.nn.Conv2d(
+                    in_channels=input_channels,
+                    out_channels=out_channels,
+                    kernel_size=kernel_size,
+                ),
             )
-            encode.add_module(f"Activation {k + 1}", torch.nn.Tanh())
+            self.encoder.add_module(f"Relu Activation {k + 1}", torch.nn.ReLU())
 
-        encode.add_module(
-            f"Feature Vector",
-            torch.nn.LazyLinear(out_features=self.n_features),
+        self.encoder.add_module(f"Flatten", torch.nn.Flatten())
+
+        size = out_channels * (256 - K * (kernel_size - 1)) ** 2
+
+        self.encoder.add_module(
+            f"Linear", torch.nn.Linear(in_features=size, out_features=n_features)
         )
+        self.encoder.add_module(f"Softmax", torch.nn.Softmax())
+        # N, out_channels * 2 * K, 256 - K * (kernel_size - 1), 256 - K * (kernel_size - 1)
 
-        encode.add_module(f"SoftMax Layer", torch.nn.Softmax())
-
-        return encode
-
-    def decoder(self):
-        decode = torch.nn.Sequential()
-        decode.add_module(
-            f"Decoding Convolution 0",
-            torch.nn.Conv2d(in_channels=..., out_channels=..., kernel_size=...),
-        )
-        decode.add_module("Activation 0", torch.nn.Tanh())
-
-        for k in self.K:
-            decode.add_module(
-                f"Convolution {k + 1}",
-                torch.nn.Conv2d(in_channels=..., out_channels=..., kernel_size=...),
-            )
-            decode.add_module(f"Activation {k + 1}", torch.nn.Tanh())
+        input_channels = n_features
+        out_channels = size
+        self.decoder = torch.nn.Sequential()
+        for k in range (K - 1):
+            input_channels = out_channels
+            out_channels = 2 * out_channels
+            self.decoder.add_module(f"ConvTranspose 2D {k + 1}", torch.nn.ConvTranspose2d(
+                in_channels = input_channels, out_channels = 
+            ))
 
     def forward(self, X):
         features = self.encoder(X)
-        out = self.decoder(features)
-
-        return out
+        breakpoint()
+        # out = self.decoder(features)
+        return
+        # return out
 
 
 if __name__ == "__main__":
@@ -120,8 +120,8 @@ if __name__ == "__main__":
 
     criterion = torch.nn.CrossEntropyLoss()
 
-    # model = Model_0_1(K=10, n_features=100)
-    model = Model_0_2(input_channels=3, K=5, N=100).to(device=device)
+    model = Model_0_1(K=5, n_features=100)
+    # model = Model_0_2(input_channels=3, K=5, N=100).to(device=device)
 
     optim = torch.optim.Adam(params=model.parameters(), lr=1e-100)
 
@@ -136,8 +136,7 @@ if __name__ == "__main__":
 
             # Forward pass
             outputs = model(inputs)
-
-            breakpoint()
+            quit()
             # Calculate the loss
             loss = criterion(outputs, inputs)
 
