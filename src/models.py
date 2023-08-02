@@ -1,21 +1,10 @@
 import torch
 import torchvision
-from image import ArchImages
-from torch.utils.data import DataLoader
+from image import ArchImages, train_loader
 
-
-device = "cuda" if torch.cuda.is_available() else "cpu"
-dataset = ArchImages(
-    "../images",
-    transform=torchvision.transforms.Compose(
-        [
-            torchvision.transforms.ToTensor(),
-            torchvision.transforms.Resize(256, antialias=True),
-            torchvision.transforms.CenterCrop(256),
-        ]
-    ),
-    device=device,
-)
+# from torch.utils.data import DataLoader
+from encoder import Encoder
+from decoder import Decoder
 
 
 class Model_0_2(torch.nn.Module):
@@ -100,12 +89,13 @@ class Model_0_1(torch.nn.Module):
         input_channels = n_features
         out_channels = size
         self.decoder = torch.nn.Sequential()
-        for k in range (K - 1):
+        for k in range(K - 1):
             input_channels = out_channels
             out_channels = 2 * out_channels
-            self.decoder.add_module(f"ConvTranspose 2D {k + 1}", torch.nn.ConvTranspose2d(
-                in_channels = input_channels, out_channels = 
-            ))
+            self.decoder.add_module(
+                f"ConvTranspose 2D {k + 1}",
+                torch.nn.ConvTranspose2d(in_channels=input_channels, out_channels=...),
+            )
 
     def forward(self, X):
         features = self.encoder(X)
@@ -115,9 +105,22 @@ class Model_0_1(torch.nn.Module):
         # return out
 
 
-if __name__ == "__main__":
-    train_loader = DataLoader(dataset=dataset, batch_size=1, shuffle=True)
+class Model_0_3(torch.nn.Modules):
+    def __init__(self, n_features):
+        super(self).__init__()
 
+        self.encoder = Encoder(n_features=n_features)
+        self.decoder = Decoder(n_features=n_features)
+
+    def forward(self, x):
+        out = self.encoder(x)
+        out = self.decoder(out)
+        return out
+
+
+if __name__ == "__main__":
+    breakpoint()
+    train_loader = train_loader()
     criterion = torch.nn.CrossEntropyLoss()
 
     model = Model_0_1(K=5, n_features=100)
