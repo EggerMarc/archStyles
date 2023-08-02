@@ -9,7 +9,7 @@ TODO:
 
 
 class Decoder(torch.nn.Module):
-    def __init__(self, n_features):
+    def __init__(self, n_features, target_size=None):
         super().__init__()
 
         self.decoder = torch.nn.Sequential()

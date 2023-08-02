@@ -12,6 +12,7 @@ TODO:
 1. Fix inconsistent sizes after compose. E.g. Error line: 
 *** RuntimeError: stack expects each tensor to be equal size, 
 but got [3, 256, 256] at entry 0 and [4, 256, 256] at entry 3
+1 - Fixed with transforms.Lambda(lambda x: x[:3])
 """
 
 
@@ -47,8 +48,8 @@ def train_loader(resize=256, batch_size=16, shuffle=True):
             [
                 torchvision.transforms.ToTensor(),
                 torchvision.transforms.Resize(int(resize * (3 / 2)), antialias=True),
-                torchvision.transforms.CenterCrop(resize)),
-                torchvision.transforms.
+                torchvision.transforms.CenterCrop(resize),
+                torchvision.transforms.Lambda(lambda x: x[:3]),
             ]
         ),
         device=device,
