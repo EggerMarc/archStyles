@@ -105,12 +105,12 @@ class Model_0_1(torch.nn.Module):
         # return out
 
 
-class Model_0_3(torch.nn.Modules):
-    def __init__(self, n_features):
-        super(self).__init__()
+class Model_0_3(torch.nn.Module):
+    def __init__(self, K, n_features):
+        super().__init__()
 
-        self.encoder = Encoder(n_features=n_features)
-        self.decoder = Decoder(n_features=n_features)
+        self.encoder = Encoder(K, n_features=n_features)
+        self.decoder = Decoder(K, n_features=n_features)
 
     def forward(self, x):
         out = self.encoder(x)
@@ -119,14 +119,14 @@ class Model_0_3(torch.nn.Modules):
 
 
 if __name__ == "__main__":
-    breakpoint()
     train_loader = train_loader()
     criterion = torch.nn.CrossEntropyLoss()
+    device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    model = Model_0_1(K=5, n_features=100)
+    model = Model_0_3(K=5, n_features=100)
     # model = Model_0_2(input_channels=3, K=5, N=100).to(device=device)
 
-    optim = torch.optim.Adam(params=model.parameters(), lr=1e-100)
+    optim = torch.optim.Adam(params=model.parameters(), lr=1e-10)
 
     epochs = 10
     epoch_loss = []
@@ -139,7 +139,6 @@ if __name__ == "__main__":
 
             # Forward pass
             outputs = model(inputs)
-            quit()
             # Calculate the loss
             loss = criterion(outputs, inputs)
 
@@ -149,7 +148,7 @@ if __name__ == "__main__":
 
             # Update the total loss
             batch_loss.append(loss.item())
-            print(f"Batch {batch_idx} loss: {loss.item()}")
+            # print(f"Batch {batch_idx} loss: {loss.item()}")
 
     # Calculate the average loss for this epoch
     avg_loss = sum(batch_loss) / len(batch_loss)

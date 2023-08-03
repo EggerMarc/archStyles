@@ -57,7 +57,6 @@ class Encoder(torch.nn.Module):
         self.encoder.add_module(f"Softmax Layer", torch.nn.Softmax(dim=1))
 
     def forward(self, x):
-        print(x.size())
         return self.encoder(x)
 
 
