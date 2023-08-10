@@ -4,3 +4,4 @@ env
 __pycache__
 *.ipynb
 .DS_Store
+*.pt

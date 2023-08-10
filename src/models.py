@@ -1,51 +1,11 @@
 import torch
 import torchvision
+
 from image import ArchImages, train_loader
 
 # from torch.utils.data import DataLoader
 from encoder import Encoder
 from decoder import Decoder
-
-
-class Model_0_2(torch.nn.Module):
-    def __init__(self, input_channels, K, N):
-        super(Model_0_2, self).__init__()
-
-        encoder_layers = []
-        decoder_layers = []
-        input_size = input_channels
-
-        # Encoder
-        for i in range(K):
-            encoder_layers.append(
-                torch.nn.Conv2d(input_size, 2 ** (i + 6), kernel_size=3, padding=1)
-            )
-            encoder_layers.append(torch.nn.ReLU())
-            encoder_layers.append(torch.nn.MaxPool2d(2, 2, padding=1))
-            input_size = 2 ** (i + 6)
-
-        encoder_layers.append(torch.nn.Conv2d(input_size, N, kernel_size=3, padding=1))
-
-        # Decoder
-        for i in range(K - 1, -1, -1):
-            decoder_layers.append(
-                torch.nn.Conv2d(N, 2 ** (i + 6), kernel_size=3, padding=1)
-            )
-            decoder_layers.append(torch.nn.ReLU())
-            decoder_layers.append(torch.nn.Upsample(scale_factor=2))
-
-        decoder_layers.append(
-            torch.nn.Conv2d(2 ** (K + 5), input_channels, kernel_size=3, padding=1)
-        )
-        decoder_layers.append(torch.nn.Sigmoid())
-
-        self.encoder = torch.nn.Sequential(*encoder_layers)
-        self.decoder = torch.nn.Sequential(*decoder_layers)
-
-    def forward(self, x):
-        encoded = self.encoder(x)
-        decoded = self.decoder(encoded)
-        return decoded
 
 
 class Model_0_1(torch.nn.Module):
@@ -105,6 +65,47 @@ class Model_0_1(torch.nn.Module):
         # return out
 
 
+class Model_0_2(torch.nn.Module):
+    def __init__(self, input_channels, K, N):
+        super(Model_0_2, self).__init__()
+
+        encoder_layers = []
+        decoder_layers = []
+        input_size = input_channels
+
+        # Encoder
+        for i in range(K):
+            encoder_layers.append(
+                torch.nn.Conv2d(input_size, 2 ** (i + 6), kernel_size=3, padding=1)
+            )
+            encoder_layers.append(torch.nn.ReLU())
+            encoder_layers.append(torch.nn.MaxPool2d(2, 2, padding=1))
+            input_size = 2 ** (i + 6)
+
+        encoder_layers.append(torch.nn.Conv2d(input_size, N, kernel_size=3, padding=1))
+
+        # Decoder
+        for i in range(K - 1, -1, -1):
+            decoder_layers.append(
+                torch.nn.Conv2d(N, 2 ** (i + 6), kernel_size=3, padding=1)
+            )
+            decoder_layers.append(torch.nn.ReLU())
+            decoder_layers.append(torch.nn.Upsample(scale_factor=2))
+
+        decoder_layers.append(
+            torch.nn.Conv2d(2 ** (K + 5), input_channels, kernel_size=3, padding=1)
+        )
+        decoder_layers.append(torch.nn.Sigmoid())
+
+        self.encoder = torch.nn.Sequential(*encoder_layers)
+        self.decoder = torch.nn.Sequential(*decoder_layers)
+
+    def forward(self, x):
+        encoded = self.encoder(x)
+        decoded = self.decoder(encoded)
+        return decoded
+
+
 class Model_0_3(torch.nn.Module):
     def __init__(self, K, n_features):
         super().__init__()
@@ -118,21 +119,33 @@ class Model_0_3(torch.nn.Module):
         return out
 
 
-if __name__ == "__main__":
-    train_loader = train_loader()
+def train(
+    version: int,
+    n_features: int = 100,
+    image_size: int = 256,
+    epochs: int = 10,
+    batch_size: int = 16,
+    lr: float = 1e-10,
+):
+    try:
+        model = torch.load(f"models/Model_v_{version}.pt")
+        return model
+    except FileNotFoundError:
+        pass
+    tr = train_loader(resize=image_size)
     criterion = torch.nn.CrossEntropyLoss()
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    model = Model_0_3(K=5, n_features=100)
+    # model = Model_0_4(base_channel_size=3, latent_dim=1000, height=32, width=32)
+    model = Model_0_3(K=5, n_features=n_features)
     # model = Model_0_2(input_channels=3, K=5, N=100).to(device=device)
 
-    optim = torch.optim.Adam(params=model.parameters(), lr=1e-10)
+    optim = torch.optim.Adam(params=model.parameters(), lr=lr)
 
-    epochs = 10
     epoch_loss = []
     for epoch in range(epochs):
         batch_loss = []
-        for batch_idx, data in enumerate(train_loader):
+        for batch_idx, data in enumerate(tr):
             inputs = data.to(device)
             # Zero the gradients
             optim.zero_grad()
@@ -150,10 +163,20 @@ if __name__ == "__main__":
             batch_loss.append(loss.item())
             # print(f"Batch {batch_idx} loss: {loss.item()}")
 
-    # Calculate the average loss for this epoch
-    avg_loss = sum(batch_loss) / len(batch_loss)
-    epoch_loss.append(avg_loss)
-    # Print the progress
-    print(f"Epoch {epoch}, Average Loss: {avg_loss:.4f}")
+        # Calculate the average loss for this epoch
+        avg_loss = sum(batch_loss) / len(batch_loss)
+        epoch_loss.append(avg_loss)
+        # Print the progress
+        print(f"Epoch {epoch}, Average Loss: {avg_loss:.4f}")
+    torch.save(model, f"models/Model_v_{version}.pt")
+    print("Training finished!")
+    return model
 
-print("Training finished!")
+
+if __name__ == "__main__":
+    tr = train_loader(resize=256)
+
+    model = train(version=6, batch_size=128, n_features=2000)
+    transform = torchvision.transforms.ToPILImage()
+    i = iter(tr).next()
+    breakpoint()
