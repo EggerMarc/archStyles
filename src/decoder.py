@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
     train_loader = train_loader()
     encoder = Encoder(5, 100)
-    encoded = encoder(iter(train_loader).next())
+    encoded = encoder(next(iter(train_loader)))
     model = Decoder(5, 100)
 
     v = model(encoded)

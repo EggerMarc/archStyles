@@ -152,6 +152,7 @@ def train(
 
             # Forward pass
             outputs = model(inputs)
+
             # Calculate the loss
             loss = criterion(outputs, inputs)
 

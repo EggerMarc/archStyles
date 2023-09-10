@@ -65,5 +65,6 @@ if __name__ == "__main__":
 
     train_loader = train_loader()
     model = Encoder(5, 100)
-    v = model(iter(train_loader).next())
+    breakpoint()
+    v = model(iter(train_loader))
     breakpoint()
