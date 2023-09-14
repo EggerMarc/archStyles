@@ -3,7 +3,7 @@ import torchvision
 
 """
 TODO:
-1. Calculate LazyLinear in_features
+1. Calculate LazyLinear in_features +
 2. Build optimal architecture. Beware of breaking zsh due to init in large params
 """
 
@@ -41,12 +41,17 @@ class Encoder(torch.nn.Module):
             )
             self.encoder.add_module(f"ReLU Layer {k}_2", torch.nn.ReLU())
 
+        ## LazyLinear in_features
+        input_in_features = torch.randn(1, 3, 256, 256)
+        output_in_features = self.encoder(input_in_features)
+        in_features = output_in_features.numel() // output_in_features.shape[0]
+
         self.encoder.add_module(
             f"Flatten", torch.nn.Flatten()
-        )  # For (3 x 256 x 256) -> 6272
+        )
         self.encoder.add_module(
             f"Linear Layer 1",
-            torch.nn.Linear(in_features=6272, out_features=n_features),
+            torch.nn.Linear(in_features, out_features=n_features),
         )
         self.encoder.add_module(f"ReLU Layer {K}", torch.nn.ReLU())
         self.encoder.add_module(
