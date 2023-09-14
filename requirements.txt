@@ -4,3 +4,4 @@ scikit_image==0.21.0
 torch==2.0.1
 torchvision==0.15.2
 gallery-dl==1.25.8
+positional_encodings>=0.2

@@ -13,3 +13,4 @@ setup.sh takes in the -d flag, which if activated will download the dataset. ETA
 [Mask2Former Hugging Face](https://huggingface.co/docs/transformers/main/en/model_doc/mask2former)  
 [Swin MAE](https://github.com/Zian-Xu/Swin-MAE/blob/main/swin_mae.py)  
 [Multi-Head Attention Tutorial](https://uvadlc-notebooks.readthedocs.io/en/latest/tutorial_notebooks/tutorial6/Transformers_and_MHAttention.html)  
+[Multi Dimensional Positional Embeddings](https://github.com/tatp22/multidim-positional-encoding)  
